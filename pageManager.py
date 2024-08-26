@@ -1,9 +1,19 @@
 import streamlit as st
+import _pages.loginPage as login
+
+pages = {}
 
 # placeholder = None
 
 def set_page(page):
     st.query_params['page'] = page
+    match (page):
+        case ("index"):
+            if (not login.IsAuthenticated()):
+                return set_page("login")
+        case ("login"):
+            if (login.IsAuthenticated()):
+                return set_page("index")
     st.rerun()
 
 # Function to get the current page from the URL

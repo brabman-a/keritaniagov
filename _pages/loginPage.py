@@ -58,6 +58,7 @@ def doSubmit(name, password):
         if (user.get("permission") > 0):
             st.success("Logging in...")
             Authenticate(name, password)
+            time.sleep(0.5)
             if (IsAuthenticated()):
                 print("Successfully Authenticated")
                 import pageManager
@@ -74,9 +75,9 @@ def doSubmit(name, password):
 
 def page():
     import pageManager
-    if (IsAuthenticated()):
-        pageManager.set_page("index")
-        return
+    # if (IsAuthenticated()):
+        # pageManager.set_page("index")
+        # return
     # with (placeholder):
     with (st.form("login")):
         name = st.text_input("Identifier")
