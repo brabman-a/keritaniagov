@@ -14,6 +14,9 @@ def set_page(page):
         case ("login"):
             if (login.IsAuthenticated()):
                 return set_page("index")
+        case ("settings"):
+            if (not login.IsAuthenticated()):
+                return set_page("login")
     st.rerun()
 
 # Function to get the current page from the URL

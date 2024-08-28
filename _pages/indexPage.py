@@ -1,8 +1,10 @@
 import streamlit as st
 import _pages.loginPage as auth
+import _pages.settingsPage as settingsPage
 import pageManager
 import time
 import dataManager
+import encrypt
 
 # placeholder = st.empty()
 
@@ -11,6 +13,9 @@ def page():
     # if (not auth.IsAuthenticated()):
         # pageManager.set_page("login")
         # return
+    if (st.query_params.get("settings") == "open"):
+        settingsPage.page()
+        return
     AuthStatus = auth.GetAuthStatus()
     UserData = dataManager.GetUser(AuthStatus.get("name"))
     Permission = UserData.get("permission")
@@ -91,7 +96,9 @@ def page():
                 "0 (Cannot log into government terminal)": 0,
                 "1 (Can perform Citizen Lookup and edit existing citizens)": 1,
                 "2 (Can register new citizens)": 2,
-                "3 (Can perform Government Agent Lookup, register new government agents, and edit existing government agents)": 3
+                "3 (Can perform Government Agent Lookup, register new government agents, and edit existing government agents)": 3,
+                "4 (View confidential documents)": 4,
+                "5 (Give other agents permission to view confidential documents)": 5
             }
             permission_gov_input = st.selectbox(
                 "Permission Level",
@@ -120,7 +127,7 @@ def page():
                     if (dataManager.Data['users'].get(name) == None):
                         dataManager.SetUser(name, {
                             'name': name,
-                            'password': password,
+                            'password': encrypt.sha256(password),
                             'permission': permissions_dropdown_options.get(permission_gov_input),
                             'day_registered': day_registered_gov
                         })
@@ -132,6 +139,15 @@ def page():
     if (logout_button):
         auth.DeAuthenticate()
         pageManager.set_page("login")
+    settings_button = st.button("Settings")
+    if (settings_button):
+        print("settings button pressed")
+        auth.UpdateAuthStatus()
+        if (not auth.IsAuthenticated()):
+            pageManager.set_page("index")
+            return
+        st.query_params["settings"] = "open"
+        pageManager.set_page("index")
                 
 
 

@@ -3,23 +3,24 @@ import dataManager
 import encrypt
 from streamlit_cookies_controller import CookieController
 import time
+import encrypt
 
 controller = CookieController()
 
 # placeholder = st.empty()
 
 def UpdateAuthStatus():
-    print("Updating auth status...")
+    # print("Updating auth status...")
     authStatus = controller.get("KGovAuth")
     if (authStatus == None): return
     userData = dataManager.GetUser(authStatus.get("name"))
     if (userData):
-        if (authStatus.get("password") != encrypt.sha256(userData.get("password"))):
+        if (authStatus.get("password") != userData.get("password")):
             print(authStatus.get("password"), userData.get("password"))
             print("Deauthenticating due to incorrect password")
             DeAuthenticate()
     else:
-        print("Deauthenticating due to no user data field")
+        # print("Deauthenticating due to no user data field")
         DeAuthenticate()
 
 def GetAuthStatus():
@@ -30,10 +31,10 @@ def IsAuthenticated():
     return GetAuthStatus() != None
 
 def Authenticate(name, password):
-    print(f"{name}: {password}")
+    # print(f"{name}: {password}")
     controller.set("KGovAuth", {
         'name': name,
-        'password': encrypt.sha256(password),
+        'password': password,
         'auth': True
     })
     UpdateAuthStatus()
@@ -54,13 +55,14 @@ def doSubmit(name, password):
         # print('invalid credentials')
         st.error("Invalid credentials")
         return
-    if (user.get("password") == password):
+    encrypted_password = encrypt.sha256(password)
+    if (encrypted_password == user.get("password")):
         if (user.get("permission") > 0):
             st.success("Logging in...")
-            Authenticate(name, password)
+            Authenticate(name, encrypted_password)
             time.sleep(0.5)
             if (IsAuthenticated()):
-                print("Successfully Authenticated")
+                # print("Successfully Authenticated")
                 import pageManager
                 # st.session_state['page'] = 'index'
                 pageManager.set_page("index")
@@ -75,6 +77,9 @@ def doSubmit(name, password):
 
 def page():
     import pageManager
+    for key in st.query_params:
+        if (key != "page"):
+            st.query_params.pop(key)
     # if (IsAuthenticated()):
         # pageManager.set_page("index")
         # return

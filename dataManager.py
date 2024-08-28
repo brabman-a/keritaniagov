@@ -177,30 +177,29 @@ def RefreshData():
             Data = json.load(stream)
     operation()
 
+def Commit():
+    with lock, open("govdata.json", "r+") as stream:
+        stream.seek(0)
+        content = json.dumps(Data, indent=4)
+        stream.write(content)
+        stream.truncate()
+
 def SetUser(name: str, value):
     def operation():
         global Data
-        with lock, open("govdata.json", "r+") as stream:
-            Data = json.load(stream)
-            logins = Data['users']
-            logins[name] = value
-            stream.seek(0)
-            content = json.dumps(Data, indent=4)
-            stream.write(content)
-            stream.truncate()
+        RefreshData()
+        logins = Data['users']
+        logins[name] = value
+        Commit()
     operation()
 
 def SetCitizen(name: str, value):
     def operation():
         global Data
-        with lock, open("govdata.json", "r+") as stream:
-            Data = json.load(stream)
-            citizens = Data['citizens']
-            citizens[name] = value
-            stream.seek(0)
-            content = json.dumps(Data, indent=4)
-            stream.write(content)
-            stream.truncate()
+        RefreshData()
+        citizens = Data['citizens']
+        citizens[name] = value
+        Commit()
     operation()
     # queue.append(operation)
 
